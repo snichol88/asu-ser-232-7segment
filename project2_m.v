@@ -40,135 +40,99 @@ module single_bit_full_adder(
 endmodule
 
 module adder(
-	input a3,
-	input a2,
-	input a1,
-	input a0,
-	input b3,
-	input b2,
-	input b1,
-	input b0,
-	output out_3,
-	output out_2,
-	output out_1,
-	output out_0,
+	input [3:0] a,
+	input [3:0] b,
+	output [3:0] out,
 	output overflow
 	);
 
 	wire first_carry;
-	single_bit_full_adder adder0(a0, b0, 0, out_0, first_carry);
+	single_bit_full_adder adder0(a[0], b[0], 1'b0, out[0], first_carry);
 	
 	wire second_carry;
-	single_bit_full_adder adder1(a1, b1, first_carry, out_1, second_carry);
+	single_bit_full_adder adder1(a[1], b[1], first_carry, out[1], second_carry);
 	
 	wire third_carry;
-	single_bit_full_adder adder2(a2, b2, second_carry, out_2, third_carry);
+	single_bit_full_adder adder2(a[2], b[2], second_carry, out[2], third_carry);
 	
-	single_bit_full_adder adder3(a3, b3, third_carry, out_3, overflow);
+	single_bit_full_adder adder3(a[3], b[3], third_carry, out[3], overflow);
 endmodule
 
 module display_converter(
-	input w,
-	input x,
-	input y,
-	input z,
+	input [3:0] in,
 	input over_in,
-	output a,
-	output b,
-	output c,
-	output d,
-	output e,
-	output f,
-	output g,
+	output [6:0] lcd,
 	output over_out
 	);
 		
 	//prep the inversions
-	wire w_not, x_not, y_not, z_not;
-	not(w_not, w);
-	not(x_not, x);
-	not(y_not, y);
-	not(z_not, z);
+	wire [3:0] nots;
+	not(nots[3], in[3]);
+	not(nots[2], in[2]);
+	not(nots[1], in[1]);
+	not(nots[0], in[0]);
 	
 	//each of these is a minterm in the boolean equations
 	//they are reused across lcd segments, so we'll
 	//define them for reuse
 	wire one, two, three, four, five, six, seven, eight, nine, zero;
-	and(one, w_not, x_not, y_not, z);
-	and(two, w_not, x_not, y, z_not);
-	and(three, w_not, x_not, y, z);
-	and(four, w_not, x, y_not, z_not);
-	and(five, w_not, x, y_not, z_not);
-	and(six, w_not, x, y, z_not);
-	and(seven, w_not, x, y, z);
-	and(eight, w, x_not, y_not, z_not);
-	and(nine, w, x_not, y_not, z);
-	and(zero, w_not, x_not, y_not, z_not);
+	and(one, nots[3], nots[2], nots[1], in[0]);
+	and(two, nots[3], nots[2], in[1], nots[0]);
+	and(three, nots[3], nots[2], in[1], in[0]);
+	and(four, nots[3], in[2], nots[1], nots[0]);
+	and(five, nots[3], in[2], nots[1], in[0]);
+	and(six, nots[3], in[2], in[1], nots[0]);
+	and(seven, nots[3], in[2], in[1], in[0]);
+	and(eight, in[3], nots[2], nots[1], nots[0]);
+	and(nine, in[3], nots[2], nots[1], in[0]);
+	and(zero, nots[3], nots[2], nots[1], nots[0]);
 	
 	//each segment can be defined as a series of numbers
 	//that turn it on
-	or(a, two, three, five, six, seven, eight, nine, zero);
-	or(b, one, two, three, four, seven, eight, nine, zero);
-	or(c, one, three, four, five, six, seven, eight, nine, zero);
-	or(d, two, three, five, six, eight, zero);
-	or(e, two, six, eight, zero);
-	or(f, four, five, six, eight, nine, zero);
-	or(g, two, three, four, five, six, eight, nine);
+	or(lcd[0], two, three, five, six, seven, eight, nine, zero);
+	or(lcd[1], one, two, three, four, seven, eight, nine, zero);
+	or(lcd[2], one, three, four, five, six, seven, eight, nine, zero);
+	or(lcd[3], two, three, five, six, eight, zero);
+	or(lcd[4], two, six, eight, zero);
+	or(lcd[5], four, five, six, eight, nine, zero);
+	or(lcd[6], two, three, four, five, six, eight, nine);
 	
-	//numbers 10-15 also produce overflow
+	//numbers 10-15 produce overflow
 	//defined by: w(x+y)
-	wire internal_overflow, four_or_two_bit;
+	wire four_or_two_bit;
 	or(four_or_two_bit, x, y);
-	and(internal_overflow, w, four_or_two_bit);
-	
-	or(over_out, over_in, internal_overflow);
+	and(over_out, in[3], four_or_two_bit);
 	
 endmodule
 
 module project2_m(
-    input a3,
-    input a2,
-    input a1,
-    input a0,
-    input b3,
-    input b2,
-    input b1,
-    input b0,
-	input s,
-	output lcd_a,
-	output lcd_b,
-	output lcd_c,
-	output lcd_d,
-	output lcd_e,
-	output lcd_f,
-	output lcd_g,
+    input [3:0] a,
+    input [3:0] b,
+    input s,
+    output [6:0] lcd,
 	output lcd_o
 	);
-
-	wire s_a_0, s_a_1, s_a_2, s_a_3;
+	
+	wire [3:0] real_a;
 	
 	//if we want to subtract, we must invert the a inputs
-	xor(s_a_0, a0, s);
-	xor(s_a_1, a1, s);
-	xor(s_a_2, a2, s);
-	xor(s_a_3, a3, s);
+	xor(real_a[0], a[0], s);
+	xor(real_a[1], a[1], s);
+	xor(real_a[2], a[2], s);
+	xor(real_a[3], a[3], s);
 	
-	wire result0, result1, result2, result3, overflow;
+	wire [3:0] result;
+	wire overflow;
 	
-	adder add(
-		s_a_0, s_a_1, s_a_2, s_a_3, 
-		b3, b2, b1, b0, 
-		result3, result2, result1, result0, 
-		overflow);
+	adder add(real_a, b, result, overflow);
 	
 	//if we want to subtract, we must also invert the output
-	wire final0, final1, final2, final3;
-	xor(final0, result0, s);
-	xor(final1, result1, s);
-	xor(final2, result2, s);
-	xor(final3, result3, s);
+	wire [3:0] final;
+	xor(final[0], result[0], s);
+	xor(final[1], result[1], s);
+	xor(final[2], result[2], s);
+	xor(final[3], result[3], s);
 	
-	display_converter display(final3, final2, final1, final0, overflow,
-		lcd_a, lcd_b, lcd_c, lcd_d, lcd_e, lcd_f, lcd_g, lcd_o);
+	display_converter display(final, overflow, lcd, lcd_o);
 	
 endmodule
