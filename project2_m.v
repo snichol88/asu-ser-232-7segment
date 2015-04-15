@@ -36,7 +36,7 @@ module single_bit_full_adder(
 	or (cout, w_carry0, w_carry1, w_carry2);
 	
 	//add the three bits together
-	xor(s, a, b, cin);
+	xor(o, a, b, cin);
 endmodule
 
 module adder(
@@ -56,15 +56,15 @@ module adder(
 	);
 
 	wire first_carry;
-	single_bit_full_adder(a0, b0, 0, out_0, first_carry);
+	single_bit_full_adder adder0(a0, b0, 0, out_0, first_carry);
 	
 	wire second_carry;
-	single_bit_full_adder(a1, b1, first_carry, out_1, second_carry);
+	single_bit_full_adder adder1(a1, b1, first_carry, out_1, second_carry);
 	
 	wire third_carry;
-	single_bit_full_adder(a2, b2, second_carry, out_2, third_carry);
+	single_bit_full_adder adder2(a2, b2, second_carry, out_2, third_carry);
 	
-	single_bit_full_adder(a3, b3, third_carry, out_3, overflow);
+	single_bit_full_adder adder3(a3, b3, third_carry, out_3, overflow);
 endmodule
 
 module display_converter(
@@ -155,7 +155,7 @@ module project2_m(
 	
 	wire result0, result1, result2, result3, overflow;
 	
-	adder(
+	adder add(
 		s_a_0, s_a_1, s_a_2, s_a_3, 
 		b3, b2, b1, b0, 
 		result3, result2, result1, result0, 
@@ -168,7 +168,7 @@ module project2_m(
 	xor(final2, result2, s);
 	xor(final3, result3, s);
 	
-	display_convert(final3, final2, final1, final0, overflow,
+	display_converter display(final3, final2, final1, final0, overflow,
 		lcd_a, lcd_b, lcd_c, lcd_d, lcd_e, lcd_f, lcd_g, lcd_o);
 	
 endmodule
