@@ -1,10 +1,11 @@
 `timescale 1ns / 1ps
 //////////////////////////////////////////////////////////////////////////////////
-// Engineer: Adam Perry
+// Company: 
+// Engineer: 
 // 
-// Create Date:    18:04:27 04/04/2015 
+// Create Date:    19:43:05 04/15/2015 
 // Design Name: 
-// Module Name:    project2_m 
+// Module Name:    project2 
 // Project Name: 
 // Target Devices: 
 // Tool versions: 
@@ -89,13 +90,13 @@ module display_converter(
 	
 	//each segment can be defined as a series of numbers
 	//that turn it on
-	or(lcd[0], two, three, five, six, seven, eight, nine, zero);
-	or(lcd[1], one, two, three, four, seven, eight, nine, zero);
-	or(lcd[2], one, three, four, five, six, seven, eight, nine, zero);
-	or(lcd[3], two, three, five, six, eight, zero);
-	or(lcd[4], two, six, eight, zero);
-	or(lcd[5], four, five, six, eight, nine, zero);
-	or(lcd[6], two, three, four, five, six, eight, nine);
+	or(lcd[6], two, three, five, six, seven, eight, nine, zero);
+	or(lcd[5], one, two, three, four, seven, eight, nine, zero);
+	or(lcd[4], one, three, four, five, six, seven, eight, nine, zero);
+	or(lcd[3], two, three, five, six, eight,nine, zero);
+	or(lcd[2], two, six, eight, zero);
+	or(lcd[1], four, five, six, eight, nine, zero);
+	or(lcd[0], two, three, four, five, six, eight, nine);
 	
 	//numbers 10-15 produce overflow
 	//defined by: w(x+y)
@@ -134,5 +135,6 @@ module project2_m(
 	xor(final[3], result[3], s);
 	
 	display_converter display(final, overflow, lcd, lcd_o);
-	
 endmodule
+	
+	
